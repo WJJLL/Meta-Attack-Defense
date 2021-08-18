@@ -44,6 +44,9 @@
 - Preparing perturbation models to ./attackModel, you can pre-download our attacker from [BaiduYun](https://pan.baidu.com/s/1e-BNvD-JoAWTqSuEv27n-A) (Password:oz7a)
 - Preparing corresponding pre-trained model from [BaiduYun](https://pan.baidu.com/s/1qH9rj0nJ_ovP8fQTOOzkdw) (Password:zmfm)
 - See runDefenseMar.sh for more information
+## Evaluate our Defense Models
+- Using 'resMeta' to create model, then load defense models 
+- You can download our defense models from [BaiduYun](https://pan.baidu.com/s/12ZHPx3lNOP__drjqZ6zO8g) (Password:9p3r)
 ## Acknowledgments
 Our code is based on [MetaAttack](https://github.com/FlyingRoastDuck/MetaAttack_AAAI21), 
 if you use our code, please also cite their paper.
