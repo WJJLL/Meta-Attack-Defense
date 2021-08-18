@@ -48,8 +48,16 @@ MODE = "bilinear"
 
 
 class TripletLoss(nn.Module):
-    """Triplet loss with hard positive , furthest negative mining.
+    """Triplet loss with hard positive/negative mining.
+
+    Reference:
+    Hermans et al. In Defense of the Triplet Loss for Person Re-Identification. arXiv:1703.07737.
+    Code imported from https://github.com/Cysu/open-reid/blob/master/reid/loss/triplet.py.
+
+    Args:
+    - margin (float): margin for triplet.
     """
+
     def __init__(self, margin=0.5):
         super(TripletLoss, self).__init__()
         self.margin = margin
@@ -71,12 +79,18 @@ class TripletLoss(nn.Module):
         # For each anchor, find the hardest positive and negative
         mat_similarity = targets.expand(n, n).eq(targets.expand(n, n).t()).float()
 
+        # sorted_mat_distance, positive_indices = torch.sort(dist + (100000.0) * (1 - mat_similarity), dim=1,
+        #                                                    descending=False)
+
         sorted_mat_distance, positive_indices = torch.sort(dist + (-100000.0) * (1 - mat_similarity), dim=1,
                                                            descending=True)
+
         hard_p = sorted_mat_distance[:, 0]
         hard_p_indice = positive_indices[:, 0]
-        sorted_mat_distance, negative_indices = torch.sort(dist + 100000.0 * mat_similarity, dim=1,
-                                                           descending=False)
+
+        ##最远的一个negative_indices
+        sorted_mat_distance, negative_indices = torch.sort(dist + (-100000.0) * mat_similarity, dim=1,
+                                                           descending=True)
         hard_n = sorted_mat_distance[:, 0]
         hard_n_indice = negative_indices[:, 0]
 
@@ -257,25 +271,19 @@ def trainMeta(meta_train_loader, meta_test_loader,net, epoch, normalize, perturb
         perturted_input_norm = (perturted_input_clamp - mean) / std
         perturbed_feature = net(perturted_input_norm)[0]
 
-
         optimizer.zero_grad()
-
         loss= TripletLoss()(feature, pids.cuda(), perturbed_feature)
 
         # maml one step
         noise=perturbation.parameters()
-
         grad = torch.autograd.grad(loss, noise, create_graph=True)
-
         noiseOneStep = keepGradUpdate(perturbation, optimizer, grad)
-
         perturbation_new=noiseOneStep
 
         #maml test
         with torch.no_grad():
             normMte = (metaTest - mean) / std
             mteFeat = net(normMte)[0]
-
 
         perMteInput = perturbation_new(metaTest)
         perMteInput = torch.clamp(perMteInput, 0, 1)
@@ -547,18 +555,6 @@ if __name__ == '__main__':
                                           args.target)
             print('On Source...\n')
             testQ = test(sourceSet, model, noise_model, args, evaSrc, epoch, args.source)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
