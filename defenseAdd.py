@@ -57,12 +57,9 @@ def get_data(sourceName, mteName, targetName, split_id, data_dir, height, width,
              batch_size, workers, combine,num_instances=8):
     root = osp.join(data_dir, sourceName)
     rootMte = osp.join(data_dir, mteName)
-    rootTgt = osp.join(data_dir, targetName)
     sourceSet = datasets.create(sourceName, root, num_val=0.1, split_id=split_id)
     mteSet = datasets.create(mteName, rootMte, num_val=0.1, split_id=split_id)
-    tgtSet = datasets.create(targetName, rootTgt, num_val=0.1, split_id=split_id)
     num_classes = sourceSet.num_trainval_ids if combine else sourceSet.num_train_ids
-    class_tgt = tgtSet.num_trainval_ids if combine else tgtSet.num_train_ids
     class_meta = mteSet.num_trainval_ids if combine else mteSet.num_train_ids
 
     class_mix=class_meta+num_classes
@@ -78,12 +75,6 @@ def get_data(sourceName, mteName, targetName, split_id, data_dir, height, width,
         T.ToTensor(),
         normalizer,
     ])
-
-    train_loader = DataLoader(
-        Preprocessor(sourceSet.trainval,
-                     root=sourceSet.images_dir, transform=train_transformer),
-        batch_size=batch_size, num_workers=workers,
-        shuffle=False, pin_memory=True)
 
     defen_train_transformer = T.Compose([
         Resize((height, width)),
@@ -112,7 +103,7 @@ def get_data(sourceName, mteName, targetName, split_id, data_dir, height, width,
         batch_size=batch_size, num_workers=workers,
         shuffle=False, pin_memory=True)
 
-    return sourceSet, tgtSet, mteSet, num_classes, class_tgt, train_loader,add_train_loader,sc_test_loader,class_meta,class_mix
+    return sourceSet,  mteSet, num_classes,  add_train_loader,sc_test_loader,class_meta,class_mix
 
 
 def rescale_check(check, sat, sat_change, sat_min):
@@ -382,7 +373,7 @@ def test(dataset, net, perturbation, args, evaluator, epoch, name, saveRank=Fals
 
 
 
-def create_attack_exp(inputs,attack_obj,proportion_attacked=0.2):
+def create_attack_exp(inputs,attack_obj,proportion_attacked=0.5):
     inputs,fname,pid,cam=inputs
     inputs=inputs.cuda()
     pid=pid.cuda()
@@ -426,7 +417,7 @@ class Trainer(object):
 
             adv_inputs_total, adv_labels, adv_labels_total, coupled_inputs = [], [], [], []
 
-            adv_data = create_attack_exp(inputs, pertutation,args.p)
+            adv_data = create_attack_exp(inputs, pertutation)
             adv_inputs, adv_labels, adv_idxs, og_adv_inputs = adv_data
             adv_inputs_total.append(adv_inputs)
             adv_labels_total.append(adv_labels)
@@ -499,8 +490,6 @@ if __name__ == '__main__':
                         default='.', help='path to reid dataset')
     parser.add_argument('-s', '--source', type=str, default='dukemtmc',
                         choices=datasets.names())
-    parser.add_argument('-t', '--target', type=str, default='market1501',
-                        choices=datasets.names())
     parser.add_argument('-m', '--mte', type=str, default='personx',
                         choices=datasets.names())
 
@@ -538,9 +527,8 @@ if __name__ == '__main__':
     parser.add_argument('--targetmodel', type=str, default='lsro', choices=modelsMate.get_names())
 
     # optimizer
-    parser.add_argument('--lr', type=float, default=0.0003,
+    parser.add_argument('--lr', type=float, default=0.0002,
                         help="learning rate of all parameters")
-    parser.add_argument('--p',type=float,default=0.2)
     parser.add_argument('--weight-decay', type=float, default=5e-4)
     # training configs
     parser.add_argument('--resume_reid', type=str, default='', metavar='PATH')
@@ -566,7 +554,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     random.seed(0)
 
-    sourceSet, tgtSet, mteSet, num_classes, class_tgt, train_loader, add_train_loader, sc_test_loader, class_meta ,class_mix= \
+    sourceSet,  mteSet, num_classes,  add_train_loader, sc_test_loader, class_meta ,class_mix= \
         get_data(args.source, args.mte, args.target,
                  args.split, args.data, args.height,
                  args.width, args.batch_size, 8, args.combine_trainval)
@@ -703,10 +691,7 @@ if __name__ == '__main__':
             print("eval on new model ")
             s = evaSrc.evaluate(sc_test_loader, sourceSet.query, sourceSet.gallery)
             ####top-1选择最优的map#####
-            # map = rank_score.map
-            # epoch_score.append(map)
-            # top1 = rank_score.market1501[0]
-            top1 = rank_score
+            top1 = rank_score.map
             defense_reid.append(rank_score)
             is_best = top1 > best_top1
             best_top1 = max(top1, best_top1)

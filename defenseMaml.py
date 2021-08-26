@@ -213,8 +213,8 @@ class Trainer(object):
             data_time.update(time.time() - end)
 
             ###meta train####
-            cur_model=self.model
-            output = cur_model(finall_input)
+            # cur_model=self.model
+            output = self.model(finall_input)
             loss, prec1 = self._memory(output, targets, epoch)
             self.model.zero_grad()
 
@@ -225,7 +225,7 @@ class Trainer(object):
             ###meta test###
             newMeta = models.create('resMeta', num_classes=class_meta)
             newMeta.copyModel(self.model.module)
-            newMeta.update_params(lr_inner=lr, lr_base=lr_base, source_params=grads, solver='adam')
+            newMeta.update_params(lr_inner=lr, lr_base=lr_base, source_params=grads[:-2], solver='adam')
             del grads
             newMeta = nn.DataParallel(newMeta).to(self.device)
 
@@ -313,15 +313,12 @@ if __name__ == '__main__':
                         choices=datasets.names())
     parser.add_argument('-m', '--mte', type=str, default='personx',
                         choices=datasets.names())
-
     parser.add_argument('--batch_size', type=int, default=64, required=True,
                         help='number of examples/minibatch')
     parser.add_argument('--num_batches', type=int, required=False,
                         help='number of batches (default entire dataset)')
     parser.add_argument('--resume', type=str, default='', metavar='PATH')
-
     parser.add_argument('-a', '--arch', type=str, default='resnet50', choices=models.names())
-
     parser.add_argument('--split', type=int, default=0)
     parser.add_argument('--height', type=int, default=256,
                         help="input height, default: 256 for resnet*, "
@@ -341,9 +338,8 @@ if __name__ == '__main__':
     parser.add_argument("--max-eps", default=8, type=int, help="max eps")
     parser.add_argument('--epoch', type=int, default=15)
     parser.add_argument('--noise_type', type=int, default=0)
-
     # optimizer
-    parser.add_argument('--lr', type=float, default=0.0003,
+    parser.add_argument('--lr', type=float, default=0.0002,
                         help="learning rate of all parameters")
     parser.add_argument('--weight-decay', type=float, default=5e-4)
     # training configs
@@ -475,7 +471,6 @@ if __name__ == '__main__':
         if epoch < args.start_save:
             continue
         if (epoch+1) % 5 == 0:
-            # metric.train(model, meta_train_loader)
             print("eval on current attack ")
             _, _, rank_score = test(sourceSet, model, noise, args, evaSrc, epoch, args.source)
             ###eval raw result

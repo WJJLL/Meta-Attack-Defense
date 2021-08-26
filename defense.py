@@ -132,12 +132,6 @@ def get_data(sourceName, split_id, data_dir, height, width,
         normalizer,
     ])
 
-    train_loader = DataLoader(
-        Preprocessor(sourceSet.trainval, args.source,
-                     root=sourceSet.images_dir, transform=train_transformer),
-        batch_size=batch_size, num_workers=workers,
-        shuffle=False, pin_memory=True)
-
     defen_train_transformer = T.Compose([
         Resize((height, width)),
         T.RandomSizedRectCrop(height, width),
@@ -160,7 +154,7 @@ def get_data(sourceName, split_id, data_dir, height, width,
         batch_size=batch_size, num_workers=workers,
         shuffle=False, pin_memory=True)
 
-    return sourceSet,  num_classes,  train_loader, sc_test_loader, defen_train_loader
+    return sourceSet,  num_classes, sc_test_loader, defen_train_loader
 
 
 def create_upa(args):
@@ -194,7 +188,7 @@ def create_upa(args):
 
     return noise
 
-def create_attack_exp(inputs,attack_obj,proportion_attacked=0.2):
+def create_attack_exp(inputs,attack_obj,proportion_attacked=0.5):
 
     inputs,fname,pid,cam=inputs
     inputs=inputs.cuda()
@@ -295,20 +289,16 @@ if __name__ == '__main__':
                         default='.', help='path to reid dataset')
     parser.add_argument('-s', '--source', type=str, default='dukemtmc',
                         choices=datasets.names())
-
     parser.add_argument('--batch_size', type=int, default=64, required=True,
                         help='number of examples/minibatch')
     parser.add_argument('--num_batches', type=int, required=False,
                         help='number of batches (default entire dataset)')
-
     parser.add_argument('--resume', type=str, default='', metavar='PATH')
     parser.add_argument('--noise_type',type=int,default=0,
                         help='0:recolorAdv+delta;'
                              '1:reColorAdv;'
                              "2:delta")
-
     parser.add_argument('--noise_resume', type=str, default='', metavar='PATH')
-
     parser.add_argument('-a', '--arch', type=str, default='resnet50', choices=models.names())
 
     parser.add_argument('--split', type=int, default=0)
@@ -330,10 +320,8 @@ if __name__ == '__main__':
     parser.add_argument("--max-eps", default=8, type=int, help="max eps")
 
     # optimizer
-    parser.add_argument('--lr', type=float, default=0.0003,
+    parser.add_argument('--lr', type=float, default=0.0002,
                         help="learning rate of all parameters")
-    parser.add_argument('--p', type=float, default=1,
-                        help="split noise data")
     parser.add_argument('--weight-decay', type=float, default=5e-4)
     # training configs
     parser.add_argument('--resume_reid', type=str, default='', metavar='PATH')
@@ -358,7 +346,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     random.seed(0)
 
-    sourceSet,  num_classes,  train_loader, sc_test_loader, defense_train_loader = \
+    sourceSet,  num_classes, sc_test_loader, defense_train_loader = \
         get_data(args.source,
                  args.split, args.data, args.height,
                  args.width, args.batch_size, 8, args.combine_trainval, args.num_instances)
@@ -425,7 +413,6 @@ if __name__ == '__main__':
         if epoch < args.start_save:
             continue
         if epoch % 5 == 0 or epoch == args.epochs-1:
-            metric.train(model, defense_train_loader)
             ##eval defense result
             print("eval on current attack ")
             _, _, rank_score = test(sourceSet, model, noise, args, evaSrc, epoch, args.source)
@@ -433,10 +420,7 @@ if __name__ == '__main__':
             print("eval on new model ")
             s = evaSrc.evaluate(sc_test_loader, sourceSet.query, sourceSet.gallery, metric)
             ####top-1选择最优的map#####
-            # map = rank_score.map
-            # epoch_score.append(map)
-            # top1 = rank_score.market1501[0]
-            top1 = rank_score
+            top1 = rank_score.map
             is_best = top1 > best_top1
             best_top1 = max(top1, best_top1)
             save_checkpoint({
