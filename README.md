@@ -36,17 +36,17 @@
 |               +-- randperson_subset
 </pre>   
 ## Preparing Attacked re-ID Models
-- Download attacked re-ID models from [BaiduYun](https://pan.baidu.com/s/1qH9rj0nJ_ovP8fQTOOzkdw) (Password:zmfm)
+- Download attacked re-ID models from [BaiduYun](https://pan.baidu.com/s/1mR9AnJ4mMmSaPIzUE09rUg) (Password:7q0o)
 - Put models under ./pretrained_models
 ## Run our Attack Code
 - See runAttackMar.sh for more information
 ## Run our Defense Code
-- Preparing perturbation models to ./attackModel, you can pre-download our attacker from [BaiduYun](https://pan.baidu.com/s/1e-BNvD-JoAWTqSuEv27n-A) (Password:oz7a)
-- Preparing corresponding pre-trained model from [BaiduYun](https://pan.baidu.com/s/1qH9rj0nJ_ovP8fQTOOzkdw) (Password:zmfm)
+- Preparing perturbation models to ./attackModel, you can pre-download our attacker from [BaiduYun](https://pan.baidu.com/s/1mkC1cymEQVdMksUBQzJE_w) (Password:d9bj)
+- Preparing corresponding pre-trained model from [BaiduYun](https://pan.baidu.com/s/1mR9AnJ4mMmSaPIzUE09rUg) (Password:7q0o)
 - See runDefenseMar.sh for more information
 ## Evaluate our Defense Models
 - Using 'resMeta' to create model, then load defense models 
-- You can download our defense models from [BaiduYun](https://pan.baidu.com/s/12ZHPx3lNOP__drjqZ6zO8g) (Password:9p3r)
+- You can download our defense models from [BaiduYun](https://pan.baidu.com/s/1sU6VV9sUCeWG8jJiZ_wxCA) (Password:gbot)
 ## Acknowledgments
 Our code is based on [MetaAttack](https://github.com/FlyingRoastDuck/MetaAttack_AAAI21), 
 if you use our code, please also cite their paper.
