@@ -1,4 +1,5 @@
 # Meta-Attack-Defense
+Code for paper ``Towards Robust Person Re-identiﬁcation by Defending Against Universal Attackers (TPAMI 2022)".
 ## Requirements：
 - python 3.7.9
 - CUDA==11.2
