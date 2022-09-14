@@ -1,5 +1,5 @@
 # Meta-Attack-Defense
-Code for paper ``Towards Robust Person Re-identiﬁcation by Defending Against Universal Attackers (TPAMI 2022)".
+Code for paper ``Towards Robust Person Re-identiﬁcation by Defending Against Universal Attackers (TPAMI 2022)[Paper](https://ieeexplore.ieee.org/document/9858024)".
 ## Requirements：
 - python 3.7.9
 - CUDA==11.2
@@ -62,13 +62,16 @@ if you use our code, please also cite their paper.
   year={2021}
 }
 ```
+## Citation
 
-
-
-
-
-
-
-
-
+If you find this repo useful for your research, please consider citing the paper
+```
+@article{yang2022towards,
+  title={Towards Robust Person Re-Identification by Defending Against Universal Attackers},
+  author={Yang, Fengxiang and Weng, Juanjuan and Zhong, Zhun and Liu, Hong and Wang, Zheng and Luo, Zhiming and Cao, Donglin and Li, Shaozi and Satoh, Shin'ichi and Sebe, Nicu},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2022},
+  publisher={IEEE}
+}
+```
 
