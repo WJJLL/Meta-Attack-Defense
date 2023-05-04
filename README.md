@@ -1,5 +1,5 @@
-# Meta-Attack-Defense
-- Code for paper ``Towards Robust Person Re-identiﬁcation by Defending Against Universal Attackers (TPAMI 2022)" [Paper](https://ieeexplore.ieee.org/document/9858024).
+# Meta-Attack-Defense (TPAMI 2022)
+- Code for paper ``Towards Robust Person Re-identiﬁcation by Defending Against Universal Attackers" [Paper](https://ieeexplore.ieee.org/document/9858024).
 <div align="center">
   <img src="method.png" width="1000px" />
 </div>
